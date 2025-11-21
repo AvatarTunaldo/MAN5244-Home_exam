@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danske Bank Private Banking - Video Concept</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const VideoPrototype = () => {
+            const [currentScene, setCurrentScene] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [progress, setProgress] = useState(0);
+            const [showControls, setShowControls] = useState(true);
+            const animationRef = useRef(null);
+
+            const scenes = [
+                {
+                    id: 1,
+                    duration: 5000,
+                    title: "Scene 1: Oslo at Dusk",
+                    voiceover: "When you have built your wealth, it's not all about the numbers – it's about what they do for you.",
+                    background: "linear-gradient(135deg, #001F3F 0%, #003d5c 50%, #00537a 100%)",
+                    visualDescription: "Oslo fjord/cityscape at dusk",
+                    imageUrl: null // Will be populated with AI-generated image
+                },
+                {
+                    id: 2,
+                    duration: 10000,
+                    title: "Scene 2: Aladdin Wealth Platform",
+                    voiceover: "With our new Private Banking solution, you gain access to Aladdin Wealth – a technology normally used only by the largest institutions.",
+                    overlayText: "Aladdin Wealth – comprehensive portfolio management & risk analysis",
+                    background: "linear-gradient(135deg, #001F3F 0%, #1a3d5c 100%)",
+                    showNetwork: true,
+                    visualDescription: "Digital networks and lines",
+                    imageUrl: null
+                },
+                {
+                    id: 3,
+                    duration: 10000,
+                    title: "Scene 3: Advisory & Technology",
+                    voiceover: "The combination of solid advisory and digital intelligence provides you with insight, customization and security – for you and your family.",
+                    background: "linear-gradient(135deg, #002847 0%, #003d5c 100%)",
+                    showDashboard: true,
+                    visualDescription: "Advisor and client with dashboard",
+                    imageUrl: null
+                },
+                {
+                    id: 4,
+                    duration: 10000,
+                    title: "Scene 4: Generational Wealth",
+                    voiceover: "Let your wealth be secure not only today – but for generations. Because the future also begins today.",
+                    background: "linear-gradient(135deg, #001F3F 0%, #004d6b 50%, #00394d 100%)",
+                    showFamily: true,
+                    visualDescription: "Family by the fjord",
+                    imageUrl: null
+                },
+                {
+                    id: 5,
+                    duration: 10000,
+                    title: "Scene 5: Call to Action",
+                    voiceover: "Contact us to begin your journey.",
+                    background: "linear-gradient(135deg, #001F3F 0%, #000814 100%)",
+                    showCTA: true,
+                    visualDescription: "Logo and contact information",
+                    imageUrl: null
+                }
+            ];
+
+            const totalDuration = scenes.reduce((acc, scene) => acc + scene.duration, 0);
+
+            useEffect(() => {
+                if (isPlaying) {
+                    const startTime = Date.now();
+                    const sceneStartProgress = scenes.slice(0, currentScene).reduce((acc, s) => acc + s.duration, 0);
+                    
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime;
+                        const newProgress = sceneStartProgress + elapsed;
+                        
+                        setProgress(newProgress);
+                        
+                        if (elapsed >= scenes[currentScene].duration) {
+                            if (currentScene < scenes.length - 1) {
+                                setCurrentScene(currentScene + 1);
+                            } else {
+                                setIsPlaying(false);
+                                setProgress(totalDuration);
+                            }
+                        } else {
+                            animationRef.current = requestAnimationFrame(animate);
+                        }
+                    };
+                    
+                    animationRef.current = requestAnimationFrame(animate);
+                    
+                    return () => {
+                        if (animationRef.current) {
+                            cancelAnimationFrame(animationRef.current);
+                        }
+                    };
+                }
+            }, [isPlaying, currentScene]);
+
+            const handlePlayPause = () => {
+                if (!isPlaying && currentScene === scenes.length - 1 && progress >= totalDuration) {
+                    setCurrentScene(0);
+                    setProgress(0);
+                }
+                setIsPlaying(!isPlaying);
+            };
+
+            const handleReset = () => {
+                setIsPlaying(false);
+                setCurrentScene(0);
+                setProgress(0);
+            };
+
+            const handleSceneClick = (index) => {
+                setIsPlaying(false);
+                setCurrentScene(index);
+                const sceneStartProgress = scenes.slice(0, index).reduce((acc, s) => acc + s.duration, 0);
+                setProgress(sceneStartProgress);
+            };
+
+            const progressPercentage = (progress / totalDuration) * 100;
+
+            return (
+                <div style={{
+                    width: '100vw',
+                    height: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    background: '#000'
+                }}>
+                    {/* Video Display Area */}
+                    <div 
+                        style={{
+                            flex: 1,
+                            position: 'relative',
+                            background: scenes[currentScene].background,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            transition: 'background 1s ease'
+                        }}
+                        onMouseEnter={() => setShowControls(true)}
+                    >
+                        {/* Animated Background Elements */}
+                        {scenes[currentScene].showNetwork && (
+                            <svg style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                opacity: 0.3
+                            }}>
+                                {[...Array(30)].map((_, i) => (
+                                    <g key={i}>
+                                        <line
+                                            x1={Math.random() * 100 + '%'}
+                                            y1={Math.random() * 100 + '%'}
+                                            x2={Math.random() * 100 + '%'}
+                                            y2={Math.random() * 100 + '%'}
+                                            stroke="#C0C0C0"
+                                            strokeWidth="1"
+                                            style={{
+                                                animation: `pulse ${2 + Math.random() * 2}s ease-in-out infinite`
+                                            }}
+                                        />
+                                        <circle
+                                            cx={Math.random() * 100 + '%'}
+                                            cy={Math.random() * 100 + '%'}
+                                            r="3"
+                                            fill="#C0C0C0"
+                                            style={{
+                                                animation: `pulse ${1.5 + Math.random() * 2}s ease-in-out infinite`
+                                            }}
+                                        />
+                                    </g>
+                                ))}
+                            </svg>
+                        )}
+
+                        {/* Scene Content */}
+                        <div style={{
+                            maxWidth: '1200px',
+                            padding: '60px',
+                            textAlign: 'center',
+                            position: 'relative',
+                            zIndex: 10
+                        }}>
+                            {/* Scene 1: Opening */}
+                            {currentScene === 0 && (
+                                <div style={{
+                                    animation: 'fadeIn 2s ease-in'
+                                }}>
+                                    <div style={{
+                                        fontSize: '28px',
+                                        marginBottom: '40px',
+                                        opacity: 0.9,
+                                        lineHeight: 1.6,
+                                        fontWeight: 300
+                                    }}>
+                                        {scenes[0].voiceover}
+                                    </div>
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '40px',
+                                        left: '60px',
+                                        fontSize: '18px',
+                                        opacity: 0.7
+                                    }}>
+                                        Danske Bank Private Banking
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Scene 2: Aladdin Wealth */}
+                            {currentScene === 1 && (
+                                <div style={{
+                                    animation: 'fadeIn 1.5s ease-in'
+                                }}>
+                                    <div style={{
+                                        fontSize: '56px',
+                                        fontWeight: 600,
+                                        marginBottom: '40px',
+                                        background: 'linear-gradient(90deg, #C0C0C0, #FFFFFF, #C0C0C0)',
+                                        backgroundSize: '200% auto',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        animation: 'shimmer 3s ease-in-out infinite'
+                                    }}>
+                                        Aladdin Wealth
+                                    </div>
+                                    <div style={{
+                                        fontSize: '24px',
+                                        marginBottom: '60px',
+                                        opacity: 0.9,
+                                        lineHeight: 1.6
+                                    }}>
+                                        {scenes[1].voiceover}
+                                    </div>
+                                    <div style={{
+                                        display: 'inline-block',
+                                        padding: '15px 30px',
+                                        background: 'rgba(192, 192, 192, 0.1)',
+                                        border: '1px solid rgba(192, 192, 192, 0.3)',
+                                        borderRadius: '8px',
+                                        fontSize: '18px'
+                                    }}>
+                                        {scenes[1].overlayText}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Scene 3: Dashboard */}
+                            {currentScene === 2 && (
+                                <div style={{
+                                    animation: 'fadeIn 1.5s ease-in'
+                                }}>
+                                    <div style={{
+                                        fontSize: '26px',
+                                        marginBottom: '60px',
+                                        lineHeight: 1.6
+                                    }}>
+                                        {scenes[2].voiceover}
+                                    </div>
+                                    {/* Mock Dashboard */}
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(3, 1fr)',
+                                        gap: '20px',
+                                        marginTop: '40px'
+                                    }}>
+                                        {['Portfolio Overview', 'Risk Analysis', 'ESG Goals'].map((item, i) => (
+                                            <div key={i} style={{
+                                                padding: '30px',
+                                                background: 'rgba(192, 192, 192, 0.05)',
+                                                border: '1px solid rgba(192, 192, 192, 0.2)',
+                                                borderRadius: '12px',
+                                                animation: `slideUp 0.6s ease-out ${i * 0.2}s both`
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '18px',
+                                                    marginBottom: '15px',
+                                                    color: '#C0C0C0'
+                                                }}>{item}</div>
+                                                <div style={{
+                                                    height: '80px',
+                                                    background: 'linear-gradient(135deg, rgba(192,192,192,0.1), rgba(192,192,192,0.3))',
+                                                    borderRadius: '8px',
+                                                    position: 'relative',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {/* Animated chart bars */}
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: '10%',
+                                                        width: '15%',
+                                                        height: '60%',
+                                                        background: '#C0C0C0',
+                                                        opacity: 0.4,
+                                                        animation: 'growUp 1s ease-out'
+                                                    }}></div>
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: '35%',
+                                                        width: '15%',
+                                                        height: '80%',
+                                                        background: '#C0C0C0',
+                                                        opacity: 0.6,
+                                                        animation: 'growUp 1.2s ease-out'
+                                                    }}></div>
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        left: '60%',
+                                                        width: '15%',
+                                                        height: '50%',
+                                                        background: '#C0C0C0',
+                                                        opacity: 0.5,
+                                                        animation: 'growUp 0.8s ease-out'
+                                                    }}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Scene 4: Generations */}
+                            {currentScene === 3 && (
+                                <div style={{
+                                    animation: 'fadeIn 1.5s ease-in'
+                                }}>
+                                    <div style={{
+                                        fontSize: '32px',
+                                        marginBottom: '40px',
+                                        lineHeight: 1.6,
+                                        fontWeight: 300
+                                    }}>
+                                        {scenes[3].voiceover}
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        gap: '40px',
+                                        marginTop: '60px',
+                                        alignItems: 'center'
+                                    }}>
+                                        {['Today', 'Tomorrow', 'Forever'].map((text, i) => (
+                                            <React.Fragment key={i}>
+                                                <div style={{
+                                                    animation: `fadeIn 0.8s ease-out ${i * 0.4}s both`
+                                                }}>
+                                                    <div style={{
+                                                        width: '120px',
+                                                        height: '120px',
+                                                        borderRadius: '50%',
+                                                        border: '2px solid #C0C0C0',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginBottom: '15px',
+                                                        background: 'rgba(192, 192, 192, 0.05)',
+                                                        fontSize: '48px',
+                                                        fontWeight: 300
+                                                    }}>
+                                                        {i === 0 ? '1' : i === 1 ? '2' : '∞'}
+                                                    </div>
+                                                    <div style={{ fontSize: '18px', color: '#C0C0C0' }}>{text}</div>
+                                                </div>
+                                                {i < 2 && (
+                                                    <div style={{
+                                                        fontSize: '32px',
+                                                        color: '#C0C0C0',
+                                                        opacity: 0.5,
+                                                        animation: `fadeIn 1s ease-out ${i * 0.4 + 0.5}s both`
+                                                    }}>→</div>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Scene 5: CTA */}
+                            {currentScene === 4 && (
+                                <div style={{
+                                    animation: 'fadeIn 1.5s ease-in'
+                                }}>
+                                    <div style={{
+                                        fontSize: '64px',
+                                        fontWeight: 600,
+                                        marginBottom: '40px',
+                                        letterSpacing: '-1px'
+                                    }}>
+                                        Danske Bank
+                                    </div>
+                                    <div style={{
+                                        fontSize: '24px',
+                                        marginBottom: '40px',
+                                        color: '#C0C0C0'
+                                    }}>
+                                        Private Banking
+                                    </div>
+                                    <div style={{
+                                        fontSize: '18px',
+                                        marginBottom: '60px',
+                                        opacity: 0.7
+                                    }}>
+                                        powered by Aladdin Wealth
+                                    </div>
+                                    <div style={{
+                                        fontSize: '24px',
+                                        marginBottom: '40px'
+                                    }}>
+                                        {scenes[4].voiceover}
+                                    </div>
+                                    <button style={{
+                                        padding: '20px 60px',
+                                        fontSize: '20px',
+                                        background: 'linear-gradient(135deg, #C0C0C0, #FFFFFF)',
+                                        color: '#001F3F',
+                                        border: 'none',
+                                        borderRadius: '50px',
+                                        cursor: 'pointer',
+                                        fontWeight: 600,
+                                        animation: 'pulse 2s ease-in-out infinite',
+                                        transition: 'transform 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                                    onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                                    >
+                                        Book a Meeting
+                                    </button>
+                                    <div style={{
+                                        marginTop: '40px',
+                                        fontSize: '18px',
+                                        color: '#C0C0C0'
+                                    }}>
+                                        danskebank.no/privatebanking
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '4px',
+                            background: 'rgba(192, 192, 192, 0.2)'
+                        }}>
+                            <div style={{
+                                height: '100%',
+                                width: `${progressPercentage}%`,
+                                background: 'linear-gradient(90deg, #C0C0C0, #FFFFFF)',
+                                transition: 'width 0.1s linear',
+                                boxShadow: '0 0 10px rgba(192, 192, 192, 0.5)'
+                            }}></div>
+                        </div>
+                    </div>
+
+                    {/* Control Panel */}
+                    <div style={{
+                        background: '#0a0a0a',
+                        padding: '30px',
+                        borderTop: '1px solid #222'
+                    }}>
+                        {/* Playback Controls */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: '20px',
+                            marginBottom: '30px'
+                        }}>
+                            <button
+                                onClick={handlePlayPause}
+                                style={{
+                                    padding: '15px 40px',
+                                    fontSize: '18px',
+                                    background: isPlaying ? '#C0C0C0' : 'linear-gradient(135deg, #C0C0C0, #FFFFFF)',
+                                    color: '#001F3F',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                {isPlaying ? '⏸ Pause' : '▶ Play'}
+                            </button>
+                            <button
+                                onClick={handleReset}
+                                style={{
+                                    padding: '15px 40px',
+                                    fontSize: '18px',
+                                    background: 'transparent',
+                                    color: '#C0C0C0',
+                                    border: '2px solid #C0C0C0',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                ↺ Reset
+                            </button>
+                        </div>
+
+                        {/* Scene Navigation */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: '15px',
+                            flexWrap: 'wrap',
+                            marginBottom: '20px'
+                        }}>
+                            {scenes.map((scene, index) => (
+                                <button
+                                    key={scene.id}
+                                    onClick={() => handleSceneClick(index)}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: currentScene === index ? 'rgba(192, 192, 192, 0.2)' : 'transparent',
+                                        color: currentScene === index ? '#fff' : '#C0C0C0',
+                                        border: '1px solid rgba(192, 192, 192, 0.3)',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        transition: 'all 0.3s'
+                                    }}
+                                >
+                                    Scene {scene.id}: {scene.title.split(':')[1]}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Scene Info */}
+                        <div style={{
+                            textAlign: 'center',
+                            color: '#C0C0C0',
+                            fontSize: '14px'
+                        }}>
+                            <div style={{ marginBottom: '10px', fontWeight: 600 }}>
+                                {scenes[currentScene].title}
+                            </div>
+                            <div style={{ opacity: 0.7, fontStyle: 'italic', maxWidth: '800px', margin: '0 auto' }}>
+                                "{scenes[currentScene].voiceover}"
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CSS Animations */}
+                    <style>{`
+                        @keyframes fadeIn {
+                            from {
+                                opacity: 0;
+                                transform: translateY(20px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+
+                        @keyframes slideUp {
+                            from {
+                                opacity: 0;
+                                transform: translateY(40px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+
+                        @keyframes growUp {
+                            from {
+                                height: 0;
+                            }
+                            to {
+                                height: inherit;
+                            }
+                        }
+
+                        @keyframes pulse {
+                            0%, 100% {
+                                opacity: 1;
+                            }
+                            50% {
+                                opacity: 0.5;
+                            }
+                        }
+
+                        @keyframes shimmer {
+                            0% {
+                                background-position: 0% 50%;
+                            }
+                            50% {
+                                background-position: 100% 50%;
+                            }
+                            100% {
+                                background-position: 0% 50%;
+                            }
+                        }
+
+                        button:hover {
+                            opacity: 0.9;
+                        }
+
+                        button:active {
+                            transform: scale(0.98);
+                        }
+                    `}</style>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<VideoPrototype />, document.getElementById('root'));
+    </script>
+</body>
+</html>
